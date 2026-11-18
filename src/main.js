@@ -1,9 +1,13 @@
 import * as maplibregl from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from '@turf/turf';
 import './style.css';
 import { analyse } from './engine.js';
 import { ZONE, BUILDING_TYPES, RULE_TOGGLES, SOURCES, roadSetback } from './rules.js';
+
+// MapLibre 6 runs tile parsing in a separate module worker; ship it as an asset.
+maplibregl.setWorkerUrl(workerUrl);
 
 // ---------------- state ----------------
 const S = {
