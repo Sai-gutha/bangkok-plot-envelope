@@ -1,0 +1,19 @@
+{
+  "name": "bangkok-plot-envelope",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Draw a plot in Bangkok (zone Y.10) and see what the 2013 city plan and the Building Control Act allow you to build, in 3D.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "test": "node test/engine.test.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@turf/turf": "^7.4.0",
+    "maplibre-gl": "^6.19.0",
+    "vite": "^8.3.8"
+  }
+}

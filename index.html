@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot Envelope · Bangkok ย.10</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div id="app">
+    <aside id="panel">
+      <header>
+        <div class="brand">Plot Envelope <span class="tag">Bangkok · ย.10</span></div>
+        <p class="sub">Draw a plot. See what the 2013 Bangkok plan and the Building Control Act let you build on it.</p>
+      </header>
+
+      <section id="sec-plot">
+        <h2>1 · Plot</h2>
+        <div class="row btns">
+          <button id="btn-draw" class="primary">Draw plot</button>
+          <button id="btn-example">Example plot</button>
+          <button id="btn-clear" class="ghost">Clear</button>
+        </div>
+        <p class="hint" id="draw-hint">Click <b>Draw plot</b>, then click the corners on the map. Click the first corner (or press Enter) to close.</p>
+        <div id="plot-stats" class="stats hidden"></div>
+      </section>
+
+      <section id="sec-road" class="hidden">
+        <h2>2 · Road it faces</h2>
+        <p class="hint">Click a plot edge on the map to make it the frontage (shown in orange).</p>
+        <div class="field">
+          <label>Road <span id="road-name" class="muted"></span></label>
+          <div class="row">
+            <input id="road-w" type="range" min="4" max="40" step="0.5" value="12" />
+            <input id="road-w-num" type="number" min="3" max="80" step="0.5" value="12" />
+            <span class="unit">m wide</span>
+          </div>
+          <p class="hint small" id="road-hint">Right-of-way width (เขตทาง). OpenStreetMap doesn't record it reliably, so check the land title deed or with the district office.</p>
+        </div>
+        <div class="field">
+          <label>Building type</label>
+          <select id="btype"></select>
+        </div>
+        <div class="field">
+          <label>FAR bonus <span class="muted">(BCP cl. 52–57)</span></label>
+          <select id="bonus">
+            <option value="0">None</option>
+            <option value="0.05">+5%</option>
+            <option value="0.1">+10%</option>
+            <option value="0.15">+15%</option>
+            <option value="0.2">+20% (max)</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="sec-rules" class="hidden">
+        <h2>3 · Rules that apply</h2>
+        <div id="rules"></div>
+        <details>
+          <summary>Turn rules off to see what each one does</summary>
+          <div id="toggles"></div>
+        </details>
+      </section>
+
+      <section id="sec-env" class="hidden">
+        <h2>4 · Allowed space</h2>
+        <div id="env"></div>
+      </section>
+
+      <section id="sec-designs" class="hidden">
+        <h2>5 · Designs that fit</h2>
+        <div id="design-tabs" class="tabs"></div>
+        <div id="design-body"></div>
+      </section>
+
+      <footer>
+        <p>Zone ย.10 is assumed for the drawn plot. Check the plot's actual zone on the BMA city-plan map before relying on this. This is a feasibility sketch, not a permit review.</p>
+      </footer>
+    </aside>
+
+    <main id="mapwrap">
+      <div id="map"></div>
+      <div id="map-tools">
+        <button id="btn-3d" class="chip on">3D</button>
+        <button id="btn-env" class="chip on">Allowed space</button>
+        <button id="btn-design" class="chip on">Design</button>
+        <button id="btn-ctx" class="chip on">Neighbours</button>
+      </div>
+      <div id="legend"></div>
+      <div id="toast" class="hidden"></div>
+    </main>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
