@@ -8,7 +8,8 @@ import {
 const M = { units: 'meters' };
 const BAND_STEP = 2; // metres; height plane is drawn as 2 m steps (conservative)
 const LOWRISE_MAX_H = 22.9; // stay under the 23 m high-rise threshold
-const SAFETY = 0.3; // m of headroom under the height plane (buffer arcs are polygonal)
+const SAFETY = 0.3;
+const MIN_PLATE = 150; // m²: smallest useful floor plate (core + a few units) // m of headroom under the height plane (buffer arcs are polygonal)
 
 // ---------- small geometry helpers ----------
 const fc = (arr) => turf.featureCollection(arr.filter(Boolean));
@@ -171,7 +172,7 @@ function coverageCap(ctx, g) {
   return Math.max(0, c);
 }
 
-function designTower(ctx, env, label, preferSlim) {
+function designTower(ctx, env, label, preferSlim, opts = {}) {
   const { type } = ctx;
   const gCap = gfaCaps(ctx, env.kind);
   const regions = nestedRegions(env.bands);
@@ -184,7 +185,8 @@ function designTower(ctx, env, label, preferSlim) {
     let g = Math.min(gCap, ra * floorsMax);
     let a = Math.min(ra, coverageCap(ctx, g));
     g = Math.min(gCap, a * floorsMax);
-    a = Math.min(ra, coverageCap(ctx, g));
+    a = Math.min(ra, coverageCap(ctx, g), Math.max(gCap / floorsMax, MIN_PLATE));
+    if (opts.coverMax) a = Math.min(a, opts.coverMax);
     if (a < 80) continue;
     const floors = Math.min(floorsMax, Math.max(1, Math.floor(gCap / a)));
     g = a * floors;
@@ -220,9 +222,9 @@ function designPodiumTower(ctx, env, label) {
   let best = null;
   for (const r of regions) {
     if (r.h < podFloors * podH + type.floorH) continue;
-    const T = intersect(inset(pod, 3), r.region); // tower set 3 m in from podium edge
+    const T = intersect(inset(pod, 3), r.region) || intersect(pod, r.region); // tower set 3 m in from podium edge
     const Ta = area(T);
-    if (Ta < 250) continue;
+    if (Ta < 200) continue;
     const ntMax = Math.floor((r.h - SAFETY - podFloors * podH) / type.floorH);
     let plate = Math.min(Ta, Math.max(450, remain / Math.max(1, ntMax)));
     plate = Math.min(plate, 1200); // slender residential plate (assumption)
@@ -240,6 +242,7 @@ function designPodiumTower(ctx, env, label) {
       if (nt >= 1) masses.push({ poly: tw, base: podFloors * podH, height: podFloors * podH + nt * type.floorH, floors: nt, plate: pa, name: 'Tower' });
     }
   }
+  if (masses.length < 2) return null; // no tower fits: not a real podium + tower scheme
   return { label, kind: env.kind, env, masses };
 }
 
@@ -322,6 +325,13 @@ export function analyse({ ring, front, W, typeKey, bonus, rules }) {
     if (lp && lp.masses.length > 1) designs.push(lp);
   }
 
+  if (designs.length < 2) {
+    const base = designs[0];
+    const cov = base ? Math.min(...base.masses.filter((m) => m.base === 0).map((m) => m.plate)) : A * 0.5;
+    const garden = designTower(ctx, ctx.envLow, (designs.length ? 'B' : 'A') + ' · Garden block (more open ground)', false, { coverMax: cov * 0.6 });
+    if (garden) designs.push(garden);
+  }
+  designs.forEach((d, i) => { d.label = `${'ABCD'[i]} · ${d.label.replace(/^[A-D] · /, '')}`; });
   const checked = designs.map((d) => checkDesign(ctx, d));
   const maxGFA = A * ZONE.far * (1 + bonus);
   const maxH = env.bands.length ? Math.max(...env.bands.map((b) => b.h)) : 0;
