@@ -201,7 +201,7 @@ function designTower(ctx, env, label, preferSlim) {
     label,
     kind: env.kind,
     env,
-    masses: [{ poly, base: 0, height: floors * type.floorH, floors, plate: a, name: 'Tower' }],
+    masses: [{ poly, base: 0, height: floors * type.floorH, floors, plate: a, name: env.kind === 'low' ? 'Block' : 'Tower' }],
   };
 }
 

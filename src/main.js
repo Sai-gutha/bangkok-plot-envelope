@@ -250,13 +250,15 @@ window.addEventListener('keydown', (e) => {
 });
 
 // ---------------- road detection from OSM ----------------
-const ROAD_WIDTH_GUESS = { motorway: 40, trunk: 40, primary: 30, secondary: 20, tertiary: 16, minor: 8, service: 6, track: 4, path: 3 };
+const ROAD_WIDTH_GUESS = { motorway: 40, trunk: 40, primary: 30, secondary: 20, tertiary: 16, minor: 8, service: 6 };
+// footpaths, tracks, rail and ferries are not public roads a plot can front for MR 33 / MR 55
+const ROAD_CLASSES = new Set(Object.keys(ROAD_WIDTH_GUESS));
 
 function nearestRoad(pt) {
   const px = map.project(pt);
   const r = 60;
   const feats = map.queryRenderedFeatures([[px.x - r, px.y - r], [px.x + r, px.y + r]])
-    .filter((f) => (f.sourceLayer === 'transportation' || f.sourceLayer === 'transportation_name') && /Line/.test(f.geometry.type));
+    .filter((f) => (f.sourceLayer === 'transportation' || f.sourceLayer === 'transportation_name') && /Line/.test(f.geometry.type) && ROAD_CLASSES.has(f.properties.class) && f.properties.brunnel !== 'tunnel');
   let best = null;
   for (const f of feats) {
     const lines = f.geometry.type === 'LineString' ? [f.geometry.coordinates] : f.geometry.coordinates;
@@ -378,7 +380,7 @@ function renderPlot() {
   setData('labels', turf.featureCollection(labels));
 }
 
-const MASS_COLORS = { Podium: '#c2b59b', Tower: '#f2efe8' };
+const MASS_COLORS = { Podium: '#c2b59b', Tower: '#f2efe8', Block: '#e9e2d4' };
 function renderMapResult() {
   const r = S.result;
   if (!r) { setData('env', EMPTY); setData('design', EMPTY); setData('fp', EMPTY); return; }
